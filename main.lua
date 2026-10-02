@@ -1,4 +1,4 @@
--- v0.1.0
+-- v0.1.1
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -36,7 +36,6 @@ realizarServerHop = function()
     local config = getgenv().BlobConfig
     getgenv().AutoStartFinder = true
 
-    -- Notificación con el orden que pediste: Árbol + " Tree, not found"
     Rayfield:Notify({
         Title = "Server hop",
         Content = tostring(config.TreeType) .. " Tree, not found",
@@ -181,17 +180,9 @@ iniciarBusqueda = function()
 
         Rayfield:Notify({
             Title = "¡Árbol Encontrado!",
-            Content = "Tipo: " .. tostring(tipoHallado) .. " (" .. tostring(partes) .. " partes)\n¿No sirve? Haz clic para Server Hop.",
-            Duration = 12,
+            Content = "Tipo: " .. tostring(tipoHallado) .. " (" .. tostring(partes) .. " partes)\nUsa el botón 'Server Hop' en el menú si deseas buscar otro.",
+            Duration = 10,
             Image = 4483362458,
-            Actions = {
-                ServerHop = {
-                    Name = "Cambiar de Servidor",
-                    Callback = function()
-                        realizarServerHop()
-                    end
-                }
-            }
         })
     else
         realizarServerHop()
@@ -203,7 +194,7 @@ end
 -- =======================================================
 
 local Window = Rayfield:CreateWindow({
-    Name = "Blob Hub - Tree Finder v0.1.0",
+    Name = "Blob Hub - Tree Finder v0.1.1",
     LoadingTitle = "Cargando Interfaz...",
     LoadingSubtitle = "Por MblobFuck",
     ConfigurationSaving = { Enabled = false },
@@ -279,6 +270,14 @@ MainTab:CreateButton({
         print("=========================================================")
 
         task.spawn(iniciarBusqueda)
+    end,
+})
+
+-- Botón manual para forzar un Server Hop en cualquier momento
+MainTab:CreateButton({
+    Name = "Server Hop",
+    Callback = function()
+        realizarServerHop()
     end,
 })
 
