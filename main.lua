@@ -21,7 +21,7 @@ local Window = Rayfield:CreateWindow({
 
 -- 3. Crear Pestañas (Tabs)
 local MainTab = Window:CreateTab("TreeFinder", "tree-pine")
--- local PlayerTab = Window:CreateTab("Jugador", 4483362458)
+local PlayerTab = Window:CreateTab("Jugador", 4483362458)
 
 -- =======================================================
 -- PESTAÑA: PRINCIPAL
