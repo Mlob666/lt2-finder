@@ -11,7 +11,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- URL de tu script alojado en GitHub
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua"
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v="
 
 -- 2. Configuración Global (se almacena en getgenv para persistir entre ejecuciones)
 getgenv().BlobConfig = getgenv().BlobConfig or {
