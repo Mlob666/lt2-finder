@@ -1,3 +1,5 @@
+-- v0.0.2
+
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
