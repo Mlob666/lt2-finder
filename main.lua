@@ -1,5 +1,3 @@
--- v0.0.1
-
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -10,10 +8,10 @@ local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer
 
--- URL de tu script alojado en GitHub
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v="
+-- URL de tu script en GitHub con bypass de caché
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v=" .. tick()
 
--- 2. Configuración Global (se almacena en getgenv para persistir entre ejecuciones)
+-- 2. Configuración Global
 getgenv().BlobConfig = getgenv().BlobConfig or {
     TreeType = "CaveCrawler",
     TreeSize = "Any",
@@ -42,7 +40,6 @@ realizarServerHop = function()
 
     getgenv().AutoStartFinder = true
 
-    -- queue_on_teleport descargas e inicias tu script de GitHub al entrar al nuevo servidor
     if queue_on_teleport then
         queue_on_teleport(string.format([[
             repeat task.wait() until game:IsLoaded()
@@ -71,7 +68,7 @@ realizarServerHop = function()
     TeleportService:Teleport(placeId, LocalPlayer)
 end
 
--- 4. Función de búsqueda de árboles (Insensible a mayúsculas/minúsculas)
+-- 4. Función de búsqueda de árboles (Sin modificación de color)
 buscarArbol = function()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -85,7 +82,6 @@ buscarArbol = function()
                 if treeClassValue and treeClassValue:IsA("StringValue") then
                     local claseActual = treeClassValue.Value
                     
-                    -- Comparación normalizada a minúsculas
                     local coincideTipo = (string.lower(claseActual) == string.lower(BlobConfig.TreeType)) 
                         or (BlobConfig.FindSpookyNeon and string.lower(claseActual) == "spookyneon")
 
@@ -118,8 +114,7 @@ buscarArbol = function()
                         end
 
                         if troncoBase and coincideTamano then
-                            troncoBase.Color = Color3.fromRGB(0, 255, 0)
-
+                            -- Teletransporte directo sin alterar las propiedades del bloque
                             if BlobConfig.TeleportToTree then
                                 local destino = troncoBase.Position + Vector3.new(0, 4, 0)
                                 rootPart.CFrame = CFrame.new(destino) * (rootPart.CFrame - rootPart.CFrame.Position)
@@ -161,7 +156,6 @@ iniciarBusqueda = function()
         BlobConfig.IsSearching = false
         getgenv().AutoStartFinder = false
     else
-        -- Server Hop inmediato
         realizarServerHop()
     end
 end
@@ -252,7 +246,6 @@ PlayerTab:CreateKeybind({
     end,
 })
 
--- Iniciar búsqueda automáticamente tras un server hop previa comprobación
 if getgenv().AutoStartFinder then
     task.spawn(iniciarBusqueda)
 end
