@@ -7,7 +7,7 @@ local Window = Rayfield:CreateWindow({
    LoadingTitle = "Cargando Interfaz...",
    LoadingSubtitle = "Por MblobFuck",
    ConfigurationSaving = {
-      Enabled = false, -- Cambia a true si quieres guardar la configuración en un archivo local
+      Enabled = false,
       FolderName = "Blob Hub",
       FileName = "BlobHubConfig"
    },
@@ -16,8 +16,20 @@ local Window = Rayfield:CreateWindow({
       Invite = "",
       RememberJoins = true
    },
-   KeySystem = false -- Cambia a true si quieres añadir un sistema de clave/key
+   KeySystem = false
 })
+
+-- Tabla para almacenar la configuración seleccionada en la UI
+local BlobConfig = {
+    TreeType = "Spooky",
+    TreeSize = "Small",
+    FindSpookyNeon = false,
+    WebhookURL = "",
+    SendWebhooks = false,
+    StopHopping = false,
+    LoadBlobHub = false,
+    TeleportToTree = false
+}
 
 -- 3. Crear Pestañas (Tabs)
 local MainTab = Window:CreateTab("TreeFinder", "tree-pine")
@@ -29,103 +41,104 @@ local PlayerTab = Window:CreateTab("Jugador", 4483362458)
 
 MainTab:CreateSection("Tree Option")
 
--- Dropdown (Lista Desplegable)
+-- Dropdown: Tipo de árbol
 MainTab:CreateDropdown({
    Name = "Tree Type",
    Options = {"Spooky", "SpookyNeon", "BlueSpruce", "LoneCave"},
-   CurrentOption = {"Spooky"},
+   CurrentOption = {BlobConfig.TreeType},
    MultipleOptions = false,
-   Flag = "DropdownOpt",
+   Flag = "TreeType",
    Callback = function(Option)
-       print("Seleccionado:", Option[1])
+       BlobConfig.TreeType = Option[1]
    end,
 })
 
--- Dropdown (Lista Desplegable)
+-- Dropdown: Tamaño de árbol
 MainTab:CreateDropdown({
    Name = "Tree Size",
    Options = {"Small", "Medium", "Large", "Any"},
-   CurrentOption = {"Small"},
+   CurrentOption = {BlobConfig.TreeSize},
    MultipleOptions = false,
-   Flag = "DropdownOpt",
+   Flag = "TreeSize",
    Callback = function(Option)
-       print("Tamaño Seleccionado:", Option[1])
+       BlobConfig.TreeSize = Option[1]
    end,
 })
 
--- Toggle (Interruptor)
+-- Toggle: Buscar SpookyNeon
 MainTab:CreateToggle({
    Name = "Find SpookyNeon Too?",
-   CurrentValue = false,
-   Flag = "ToggleAuto",
+   CurrentValue = BlobConfig.FindSpookyNeon,
+   Flag = "ToggleSpookyNeon",
    Callback = function(Value)
-       print("Estado del Toggle:", Value)
+       BlobConfig.FindSpookyNeon = Value
    end,
 })
 
 MainTab:CreateSection("Webhook Option")
 
--- Input de Texto
+-- Input: Enlace de Webhook
 MainTab:CreateInput({
    Name = "Webhook Link",
    PlaceholderText = "Webhook Link Here",
    RemoveTextAfterFocusLost = false,
+   Flag = "WebhookLinkInput",
    Callback = function(Text)
-       print("Texto ingresado:", Text)
+       BlobConfig.WebhookURL = Text
    end,
 })
 
--- Toggle (Interruptor)
+-- Toggle: Enviar Webhooks
 MainTab:CreateToggle({
    Name = "Send Webhooks",
-   CurrentValue = false,
-   Flag = "ToggleAuto",
+   CurrentValue = BlobConfig.SendWebhooks,
+   Flag = "ToggleSendWebhooks",
    Callback = function(Value)
-       print("Estado del Toggle webhook:", Value)
+       BlobConfig.SendWebhooks = Value
    end,
 })
 
 MainTab:CreateSection("Settings")
 
--- Toggle (Interruptor)
+-- Toggle: Detener Server Hop al encontrar
 MainTab:CreateToggle({
    Name = "Stop hopping when found",
-   CurrentValue = false,
-   Flag = "ToggleAuto",
+   CurrentValue = BlobConfig.StopHopping,
+   Flag = "ToggleHopping",
    Callback = function(Value)
-       print("Estado del Toggle hop:", Value)
+       BlobConfig.StopHopping = Value
    end,
 })
 
--- Toggle (Interruptor)
+-- Toggle: Cargar Hub al encontrar
 MainTab:CreateToggle({
    Name = "Load BlobHub when found",
-   CurrentValue = false,
-   Flag = "ToggleAuto",
+   CurrentValue = BlobConfig.LoadBlobHub,
+   Flag = "ToggleLoadWhenFound",
    Callback = function(Value)
-       print("Estado del Toggle load:", Value)
+       BlobConfig.LoadBlobHub = Value
    end,
 })
 
--- Toggle (Interruptor)
+-- Toggle: Teletransporte
 MainTab:CreateToggle({
    Name = "Teleport to tree when found",
-   CurrentValue = false,
-   Flag = "ToggleAuto",
+   CurrentValue = BlobConfig.TeleportToTree,
+   Flag = "ToggleTPWhenFound",
    Callback = function(Value)
-       print("Estado del Toggle teleport:", Value)
+       BlobConfig.TeleportToTree = Value
    end,
 })
 
 MainTab:CreateSection("Finder")
 
--- Botón
+-- Botón principal
 MainTab:CreateButton({
    Name = "Find Tree",
    Callback = function()
        Rayfield:Notify({
-           Title = "Prueba Exitosa",
-           Content = "¡El botón de Rayfield está funcionando!",
+           Title = "Búsqueda Iniciada",
+           Content = "Buscando árbol: " .. BlobConfig.TreeType .. " (" .. BlobConfig.TreeSize .. ")",
            Duration = 4,
            Image = 4483362458,
        })
@@ -145,6 +158,6 @@ PlayerTab:CreateKeybind({
    HoldToInteract = false,
    Flag = "KeybindUI",
    Callback = function(Keybind)
-       -- Rayfield gestiona el ocultado automáticamente o puedes personalizarlo
+       -- Rayfield gestiona el ocultado automáticamente
    end,
 })
