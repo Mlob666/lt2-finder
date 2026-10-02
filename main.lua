@@ -1,4 +1,4 @@
--- v0.0.8
+-- v0.1.0
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -36,9 +36,10 @@ realizarServerHop = function()
     local config = getgenv().BlobConfig
     getgenv().AutoStartFinder = true
 
+    -- Notificación con el orden que pediste: Árbol + " Tree, not found"
     Rayfield:Notify({
         Title = "Server hop",
-        Content = tostring(config.TreeType) .. "Tree, not found",
+        Content = tostring(config.TreeType) .. " Tree, not found",
         Duration = 3,
         Image = 4483362458,
     })
@@ -158,7 +159,7 @@ buscarArbol = function()
     return false, nil, nil, 0
 end
 
--- 5. Bucle de ejecución principal con confirmación de usuario
+-- 5. Bucle de ejecución principal
 iniciarBusqueda = function()
     local config = getgenv().BlobConfig
     config.IsSearching = true
@@ -178,21 +179,14 @@ iniciarBusqueda = function()
         config.IsSearching = false
         getgenv().AutoStartFinder = false
 
-        -- Notificación con botón interactivo para cambiar de servidor si no convence el árbol
         Rayfield:Notify({
             Title = "¡Árbol Encontrado!",
-            Content = "Tipo: " .. tostring(tipoHallado) .. " (" .. tostring(partes) .. " partes)\n¿No te sirve? Presiona para cambiar de servidor.",
-            Duration = 15,
+            Content = "Tipo: " .. tostring(tipoHallado) .. " (" .. tostring(partes) .. " partes)\n¿No sirve? Haz clic para Server Hop.",
+            Duration = 12,
             Image = 4483362458,
             Actions = {
-                Ignore = {
-                    Name = "Quedarme aquí",
-                    Callback = function()
-                        print("El usuario decidió quedarse en este servidor.")
-                    end
-                },
                 ServerHop = {
-                    Name = "Servidor Siguiente",
+                    Name = "Cambiar de Servidor",
                     Callback = function()
                         realizarServerHop()
                     end
@@ -209,7 +203,7 @@ end
 -- =======================================================
 
 local Window = Rayfield:CreateWindow({
-    Name = "Blob Hub - Tree Finder v0.0.8",
+    Name = "Blob Hub - Tree Finder v0.1.0",
     LoadingTitle = "Cargando Interfaz...",
     LoadingSubtitle = "Por MblobFuck",
     ConfigurationSaving = { Enabled = false },
