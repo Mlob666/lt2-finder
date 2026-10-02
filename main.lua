@@ -1,3 +1,5 @@
+-- v0.0.1
+
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -8,10 +10,13 @@ local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer
 
--- 2. Configuración Global (se almacena en getgenv para persistir)
+-- URL de tu script alojado en GitHub
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua"
+
+-- 2. Configuración Global (se almacena en getgenv para persistir entre ejecuciones)
 getgenv().BlobConfig = getgenv().BlobConfig or {
     TreeType = "CaveCrawler",
-    TreeSize = "Any", -- Corregido a "Any" con mayúscula inicial
+    TreeSize = "Any",
     FindSpookyNeon = false,
     WebhookURL = "",
     SendWebhooks = false,
@@ -37,15 +42,14 @@ realizarServerHop = function()
 
     getgenv().AutoStartFinder = true
 
-    -- queue_on_teleport guarda la orden de autoejecución al entrar al nuevo servidor
+    -- queue_on_teleport descargas e inicias tu script de GitHub al entrar al nuevo servidor
     if queue_on_teleport then
-        queue_on_teleport([[
+        queue_on_teleport(string.format([[
             repeat task.wait() until game:IsLoaded()
             task.wait(3)
-            if getgenv().IniciarBusquedaBlobHub then
-                getgenv().IniciarBusquedaBlobHub()
-            end
-        ]])
+            getgenv().AutoStartFinder = true
+            loadstring(game:HttpGet('%s'))()
+        ]], SCRIPT_URL))
     end
 
     local placeId = game.PlaceId
@@ -81,7 +85,7 @@ buscarArbol = function()
                 if treeClassValue and treeClassValue:IsA("StringValue") then
                     local claseActual = treeClassValue.Value
                     
-                    -- Comparación insensible a mayúsculas
+                    -- Comparación normalizada a minúsculas
                     local coincideTipo = (string.lower(claseActual) == string.lower(BlobConfig.TreeType)) 
                         or (BlobConfig.FindSpookyNeon and string.lower(claseActual) == "spookyneon")
 
@@ -103,7 +107,6 @@ buscarArbol = function()
                         local coincideTamano = false
                         local tamanoSeleccionado = string.lower(BlobConfig.TreeSize)
 
-                        -- Validación de tamaño corregida
                         if tamanoSeleccionado == "any" then
                             coincideTamano = true
                         elseif tamanoSeleccionado == "small" and cantidadPartes <= 15 then
@@ -162,9 +165,6 @@ iniciarBusqueda = function()
         realizarServerHop()
     end
 end
-
--- Guardar referencia global
-getgenv().IniciarBusquedaBlobHub = iniciarBusqueda
 
 -- =======================================================
 -- INTERFAZ RAYFIELD
