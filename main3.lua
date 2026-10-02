@@ -1,4 +1,4 @@
--- v0.0.3
+-- v0.0.4
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -11,7 +11,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- URL de tu script en GitHub con bypass de caché
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main3.lua" .. tick()
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main4.lua"
 
 -- 2. Configuración Global Persistente
 -- Si no existen valores previos en la memoria (getgenv), recién ahí establece la configuración por defecto.
