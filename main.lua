@@ -1,4 +1,4 @@
--- v0.0.4
+-- v0.0.5
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -11,23 +11,20 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- URL de tu script en GitHub con bypass de caché
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main4.lua"
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v=" .. tick()
 
 -- 2. Configuración Global Persistente
--- Si no existen valores previos en la memoria (getgenv), recién ahí establece la configuración por defecto.
-if not getgenv().BlobConfig then
-    getgenv().BlobConfig = {
-        TreeType = "CaveCrawler",
-        TreeSize = "Any",
-        FindSpookyNeon = false,
-        WebhookURL = "",
-        SendWebhooks = false,
-        StopHopping = true,
-        LoadBlobHub = false,
-        TeleportToTree = true,
-        IsSearching = false
-    }
-end
+getgenv().BlobConfig = getgenv().BlobConfig or {
+    TreeType = "CaveCrawler",
+    TreeSize = "Any",
+    FindSpookyNeon = false,
+    WebhookURL = "",
+    SendWebhooks = false,
+    StopHopping = true,
+    LoadBlobHub = false,
+    TeleportToTree = true,
+    IsSearching = false
+}
 
 local BlobConfig = getgenv().BlobConfig
 
@@ -36,15 +33,16 @@ local realizarServerHop, buscarArbol, iniciarBusqueda
 
 -- 3. Función para realizar Server Hop con Notificación Personalizada
 realizarServerHop = function()
-    -- Notificación con el formato solicitado
+    -- Aseguramos que la memoria global tenga la última selección exacta
+    getgenv().BlobConfig = BlobConfig
+    getgenv().AutoStartFinder = true
+
     Rayfield:Notify({
         Title = "Server hop",
         Content = "Tree not found: " .. tostring(BlobConfig.TreeType),
         Duration = 3,
         Image = 4483362458,
     })
-
-    getgenv().AutoStartFinder = true
 
     if queue_on_teleport then
         queue_on_teleport(string.format([[
@@ -178,11 +176,10 @@ local Window = Rayfield:CreateWindow({
 })
 
 local MainTab = Window:CreateTab("TreeFinder", "search")
-PlayerTab = Window:CreateTab("Jugador", 4483362458)
+local PlayerTab = Window:CreateTab("Jugador", 4483362458)
 
 MainTab:CreateSection("Tree Option")
 
--- El valor por defecto del Dropdown toma directamente la variable persistente BlobConfig.TreeType
 MainTab:CreateDropdown({
     Name = "Tree Type",
     Options = {"Spooky", "SpookyNeon", "CaveCrawler", "BlueSpruce", "LoneCave"},
@@ -190,11 +187,12 @@ MainTab:CreateDropdown({
     MultipleOptions = false,
     Flag = "TreeType",
     Callback = function(Option)
-        BlobConfig.TreeType = Option[1]
+        local seleccion = typeof(Option) == "table" and Option[1] or Option
+        BlobConfig.TreeType = seleccion
+        getgenv().BlobConfig.TreeType = seleccion
     end,
 })
 
--- El valor por defecto toma directamente la variable persistente BlobConfig.TreeSize
 MainTab:CreateDropdown({
     Name = "Tree Size",
     Options = {"Small", "Medium", "Large", "Any"},
@@ -202,7 +200,9 @@ MainTab:CreateDropdown({
     MultipleOptions = false,
     Flag = "TreeSize",
     Callback = function(Option)
-        BlobConfig.TreeSize = Option[1]
+        local seleccion = typeof(Option) == "table" and Option[1] or Option
+        BlobConfig.TreeSize = seleccion
+        getgenv().BlobConfig.TreeSize = seleccion
     end,
 })
 
@@ -212,6 +212,7 @@ MainTab:CreateToggle({
     Flag = "ToggleSpookyNeon",
     Callback = function(Value)
         BlobConfig.FindSpookyNeon = Value
+        getgenv().BlobConfig.FindSpookyNeon = Value
     end,
 })
 
@@ -223,6 +224,7 @@ MainTab:CreateToggle({
     Flag = "ToggleTPWhenFound",
     Callback = function(Value)
         BlobConfig.TeleportToTree = Value
+        getgenv().BlobConfig.TeleportToTree = Value
     end,
 })
 
