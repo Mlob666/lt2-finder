@@ -8,10 +8,10 @@ local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer
 
--- 2. Configuración Global (se almacena en getgenv para persistir entre Server Hops)
+-- 2. Configuración Global (se almacena en getgenv para persistir)
 getgenv().BlobConfig = getgenv().BlobConfig or {
     TreeType = "CaveCrawler",
-    TreeSize = "Any",
+    TreeSize = "Any", -- Corregido a "Any" con mayúscula inicial
     FindSpookyNeon = false,
     WebhookURL = "",
     SendWebhooks = false,
@@ -26,7 +26,7 @@ local BlobConfig = getgenv().BlobConfig
 -- Definición adelantada de funciones
 local realizarServerHop, buscarArbol, iniciarBusqueda
 
--- 3. Función para realizar Server Hop Inmediato
+-- 3. Función para realizar Server Hop
 realizarServerHop = function()
     Rayfield:Notify({
         Title = "Server Hop Inmediato",
@@ -35,15 +35,14 @@ realizarServerHop = function()
         Image = 4483362458,
     })
 
-    -- Se marca la bandera global para autoejecutar la búsqueda en el nuevo servidor
     getgenv().AutoStartFinder = true
 
-    -- queue_on_teleport usando un script dinámico sin URLs fijas
+    -- queue_on_teleport guarda la orden de autoejecución al entrar al nuevo servidor
     if queue_on_teleport then
         queue_on_teleport([[
             repeat task.wait() until game:IsLoaded()
             task.wait(3)
-            if getgenv().AutoStartFinder and getgenv().IniciarBusquedaBlobHub then
+            if getgenv().IniciarBusquedaBlobHub then
                 getgenv().IniciarBusquedaBlobHub()
             end
         ]])
@@ -65,11 +64,10 @@ realizarServerHop = function()
         end
     end
 
-    -- Si falla la API de servidores públicos, realizar teletransporte directo
     TeleportService:Teleport(placeId, LocalPlayer)
 end
 
--- 4. Función de búsqueda de árboles
+-- 4. Función de búsqueda de árboles (Insensible a mayúsculas/minúsculas)
 buscarArbol = function()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -83,8 +81,9 @@ buscarArbol = function()
                 if treeClassValue and treeClassValue:IsA("StringValue") then
                     local claseActual = treeClassValue.Value
                     
-                    local coincideTipo = (claseActual == BlobConfig.TreeType) 
-                        or (BlobConfig.FindSpookyNeon and claseActual == "SpookyNeon")
+                    -- Comparación insensible a mayúsculas
+                    local coincideTipo = (string.lower(claseActual) == string.lower(BlobConfig.TreeType)) 
+                        or (BlobConfig.FindSpookyNeon and string.lower(claseActual) == "spookyneon")
 
                     if coincideTipo then
                         local seccionesMadera = {}
@@ -102,14 +101,16 @@ buscarArbol = function()
 
                         local cantidadPartes = #seccionesMadera
                         local coincideTamano = false
+                        local tamanoSeleccionado = string.lower(BlobConfig.TreeSize)
 
-                        if BlobConfig.TreeSize == "Any" then
+                        -- Validación de tamaño corregida
+                        if tamanoSeleccionado == "any" then
                             coincideTamano = true
-                        elseif BlobConfig.TreeSize == "Small" and cantidadPartes <= 15 then
+                        elseif tamanoSeleccionado == "small" and cantidadPartes <= 15 then
                             coincideTamano = true
-                        elseif BlobConfig.TreeSize == "Medium" and (cantidadPartes > 15 and cantidadPartes <= 35) then
+                        elseif tamanoSeleccionado == "medium" and (cantidadPartes > 15 and cantidadPartes <= 35) then
                             coincideTamano = true
-                        elseif BlobConfig.TreeSize == "Large" and cantidadPartes > 35 then
+                        elseif tamanoSeleccionado == "large" and cantidadPartes > 35 then
                             coincideTamano = true
                         end
 
@@ -157,16 +158,16 @@ iniciarBusqueda = function()
         BlobConfig.IsSearching = false
         getgenv().AutoStartFinder = false
     else
-        -- Server Hop inmediato si no se encuentra en el mapa
+        -- Server Hop inmediato
         realizarServerHop()
     end
 end
 
--- Guardar referencia global de la función para el reconector
+-- Guardar referencia global
 getgenv().IniciarBusquedaBlobHub = iniciarBusqueda
 
 -- =======================================================
--- VENTANA E INTERFAZ RAYFIELD
+-- INTERFAZ RAYFIELD
 -- =======================================================
 
 local Window = Rayfield:CreateWindow({
@@ -229,14 +230,11 @@ MainTab:CreateSection("Finder")
 MainTab:CreateButton({
     Name = "Find Tree",
     Callback = function()
-        -- Impresión detallada de opciones elegidas en la Consola del Desarrollador (F9)
         print("======== [ BLOB HUB CONFIGURACIÓN SELECCIONADA ] ========")
         print("Tipo de Árbol (TreeType):", BlobConfig.TreeType)
         print("Tamaño de Árbol (TreeSize):", BlobConfig.TreeSize)
         print("Buscar SpookyNeon También:", tostring(BlobConfig.FindSpookyNeon))
         print("Teletransportar al Encontrar:", tostring(BlobConfig.TeleportToTree))
-        print("Webhook URL:", BlobConfig.WebhookURL ~= "" and BlobConfig.WebhookURL or "Ninguna")
-        print("Enviar Webhooks:", tostring(BlobConfig.SendWebhooks))
         print("=========================================================")
 
         task.spawn(iniciarBusqueda)
@@ -254,7 +252,7 @@ PlayerTab:CreateKeybind({
     end,
 })
 
--- Ejecución automática si venimos de un Server Hop previo
+-- Iniciar búsqueda automáticamente tras un server hop previa comprobación
 if getgenv().AutoStartFinder then
     task.spawn(iniciarBusqueda)
 end
