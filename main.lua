@@ -1,4 +1,4 @@
--- v0.0.5
+-- v0.0.6
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -13,33 +13,32 @@ local LocalPlayer = Players.LocalPlayer
 -- URL de tu script en GitHub con bypass de caché
 local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v=" .. tick()
 
--- 2. Configuración Global Persistente
-getgenv().BlobConfig = getgenv().BlobConfig or {
-    TreeType = "CaveCrawler",
-    TreeSize = "Any",
-    FindSpookyNeon = false,
-    WebhookURL = "",
-    SendWebhooks = false,
-    StopHopping = true,
-    LoadBlobHub = false,
-    TeleportToTree = true,
-    IsSearching = false
-}
-
-local BlobConfig = getgenv().BlobConfig
+-- 2. Configuración Global Persistente en memoria de Luau
+if not getgenv().BlobConfig then
+    getgenv().BlobConfig = {
+        TreeType = "CaveCrawler",
+        TreeSize = "Any",
+        FindSpookyNeon = false,
+        WebhookURL = "",
+        SendWebhooks = false,
+        StopHopping = true,
+        LoadBlobHub = false,
+        TeleportToTree = true,
+        IsSearching = false
+    }
+end
 
 -- Definición adelantada de funciones
 local realizarServerHop, buscarArbol, iniciarBusqueda
 
 -- 3. Función para realizar Server Hop con Notificación Personalizada
 realizarServerHop = function()
-    -- Aseguramos que la memoria global tenga la última selección exacta
-    getgenv().BlobConfig = BlobConfig
+    local configActual = getgenv().BlobConfig
     getgenv().AutoStartFinder = true
 
     Rayfield:Notify({
         Title = "Server hop",
-        Content = "Tree not found: " .. tostring(BlobConfig.TreeType),
+        Content = "Tree not found: " .. tostring(configActual.TreeType),
         Duration = 3,
         Image = 4483362458,
     })
@@ -74,6 +73,7 @@ end
 
 -- 4. Función de búsqueda de árboles
 buscarArbol = function()
+    local config = getgenv().BlobConfig
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
@@ -86,8 +86,8 @@ buscarArbol = function()
                 if treeClassValue and treeClassValue:IsA("StringValue") then
                     local claseActual = treeClassValue.Value
                     
-                    local coincideTipo = (string.lower(claseActual) == string.lower(BlobConfig.TreeType)) 
-                        or (BlobConfig.FindSpookyNeon and string.lower(claseActual) == "spookyneon")
+                    local coincideTipo = (string.lower(claseActual) == string.lower(config.TreeType)) 
+                        or (config.FindSpookyNeon and string.lower(claseActual) == "spookyneon")
 
                     if coincideTipo then
                         local seccionesMadera = {}
@@ -105,7 +105,7 @@ buscarArbol = function()
 
                         local cantidadPartes = #seccionesMadera
                         local coincideTamano = false
-                        local tamanoSeleccionado = string.lower(BlobConfig.TreeSize)
+                        local tamanoSeleccionado = string.lower(config.TreeSize)
 
                         if tamanoSeleccionado == "any" then
                             coincideTamano = true
@@ -118,7 +118,7 @@ buscarArbol = function()
                         end
 
                         if troncoBase and coincideTamano then
-                            if BlobConfig.TeleportToTree then
+                            if config.TeleportToTree then
                                 local destino = troncoBase.Position + Vector3.new(0, 4, 0)
                                 rootPart.CFrame = CFrame.new(destino) * (rootPart.CFrame - rootPart.CFrame.Position)
                             end
@@ -136,11 +136,12 @@ end
 
 -- 5. Bucle de ejecución principal
 iniciarBusqueda = function()
-    BlobConfig.IsSearching = true
+    local config = getgenv().BlobConfig
+    config.IsSearching = true
 
     Rayfield:Notify({
         Title = "Buscando Árbol...",
-        Content = "Escaneando mapa (" .. tostring(BlobConfig.TreeType) .. ")...",
+        Content = "Escaneando mapa (" .. tostring(config.TreeType) .. ")...",
         Duration = 3,
         Image = 4483362458,
     })
@@ -156,7 +157,7 @@ iniciarBusqueda = function()
             Duration = 10,
             Image = 4483362458,
         })
-        BlobConfig.IsSearching = false
+        config.IsSearching = false
         getgenv().AutoStartFinder = false
     else
         realizarServerHop()
@@ -183,35 +184,32 @@ MainTab:CreateSection("Tree Option")
 MainTab:CreateDropdown({
     Name = "Tree Type",
     Options = {"Spooky", "SpookyNeon", "CaveCrawler", "BlueSpruce", "LoneCave"},
-    CurrentOption = {BlobConfig.TreeType},
+    CurrentOption = {getgenv().BlobConfig.TreeType},
     MultipleOptions = false,
     Flag = "TreeType",
     Callback = function(Option)
-        local seleccion = typeof(Option) == "table" and Option[1] or Option
-        BlobConfig.TreeType = seleccion
-        getgenv().BlobConfig.TreeType = seleccion
+        local valor = typeof(Option) == "table" and Option[1] or Option
+        getgenv().BlobConfig.TreeType = valor
     end,
 })
 
 MainTab:CreateDropdown({
     Name = "Tree Size",
     Options = {"Small", "Medium", "Large", "Any"},
-    CurrentOption = {BlobConfig.TreeSize},
+    CurrentOption = {getgenv().BlobConfig.TreeSize},
     MultipleOptions = false,
     Flag = "TreeSize",
     Callback = function(Option)
-        local seleccion = typeof(Option) == "table" and Option[1] or Option
-        BlobConfig.TreeSize = seleccion
-        getgenv().BlobConfig.TreeSize = seleccion
+        local valor = typeof(Option) == "table" and Option[1] or Option
+        getgenv().BlobConfig.TreeSize = valor
     end,
 })
 
 MainTab:CreateToggle({
     Name = "Find SpookyNeon Too?",
-    CurrentValue = BlobConfig.FindSpookyNeon,
+    CurrentValue = getgenv().BlobConfig.FindSpookyNeon,
     Flag = "ToggleSpookyNeon",
     Callback = function(Value)
-        BlobConfig.FindSpookyNeon = Value
         getgenv().BlobConfig.FindSpookyNeon = Value
     end,
 })
@@ -220,10 +218,9 @@ MainTab:CreateSection("Settings")
 
 MainTab:CreateToggle({
     Name = "Teleport to tree when found",
-    CurrentValue = BlobConfig.TeleportToTree,
+    CurrentValue = getgenv().BlobConfig.TeleportToTree,
     Flag = "ToggleTPWhenFound",
     Callback = function(Value)
-        BlobConfig.TeleportToTree = Value
         getgenv().BlobConfig.TeleportToTree = Value
     end,
 })
@@ -233,11 +230,12 @@ MainTab:CreateSection("Finder")
 MainTab:CreateButton({
     Name = "Find Tree",
     Callback = function()
+        local c = getgenv().BlobConfig
         print("======== [ BLOB HUB CONFIGURACIÓN SELECCIONADA ] ========")
-        print("Tipo de Árbol (TreeType):", BlobConfig.TreeType)
-        print("Tamaño de Árbol (TreeSize):", BlobConfig.TreeSize)
-        print("Buscar SpookyNeon También:", tostring(BlobConfig.FindSpookyNeon))
-        print("Teletransportar al Encontrar:", tostring(BlobConfig.TeleportToTree))
+        print("Tipo de Árbol (TreeType):", c.TreeType)
+        print("Tamaño de Árbol (TreeSize):", c.TreeSize)
+        print("Buscar SpookyNeon También:", tostring(c.FindSpookyNeon))
+        print("Teletransportar al Encontrar:", tostring(c.TeleportToTree))
         print("=========================================================")
 
         task.spawn(iniciarBusqueda)
