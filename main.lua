@@ -1,4 +1,4 @@
--- v0.0.7
+-- v0.0.8
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -38,13 +38,12 @@ realizarServerHop = function()
 
     Rayfield:Notify({
         Title = "Server hop",
-        Content = "Tree not found: " .. tostring(config.TreeType),
+        Content = .. tostring(config.TreeType) "Tree not found: ",
         Duration = 3,
         Image = 4483362458,
     })
 
     if queue_on_teleport then
-        -- Construimos el código que redefinirá getgenv().BlobConfig en el nuevo servidor antes de descargar main.lua
         local codeToQueue = string.format([[
             repeat task.wait() until game:IsLoaded()
             task.wait(2)
@@ -148,7 +147,7 @@ buscarArbol = function()
                                 rootPart.CFrame = CFrame.new(destino) * (rootPart.CFrame - rootPart.CFrame.Position)
                             end
 
-                            return true, claseActual, troncoBase.Position
+                            return true, claseActual, troncoBase.Position, cantidadPartes
                         end
                     end
                 end
@@ -156,10 +155,10 @@ buscarArbol = function()
         end
     end
 
-    return false, nil, nil
+    return false, nil, nil, 0
 end
 
--- 5. Bucle de ejecución principal
+-- 5. Bucle de ejecución principal con confirmación de usuario
 iniciarBusqueda = function()
     local config = getgenv().BlobConfig
     config.IsSearching = true
@@ -173,17 +172,33 @@ iniciarBusqueda = function()
 
     task.wait(3)
 
-    local encontrado, tipoHallado, pos = buscarArbol()
+    local encontrado, tipoHallado, pos, partes = buscarArbol()
 
     if encontrado then
-        Rayfield:Notify({
-            Title = "¡Árbol Encontrado!",
-            Content = "Tipo: " .. tostring(tipoHallado) .. " en " .. tostring(pos),
-            Duration = 10,
-            Image = 4483362458,
-        })
         config.IsSearching = false
         getgenv().AutoStartFinder = false
+
+        -- Notificación con botón interactivo para cambiar de servidor si no convence el árbol
+        Rayfield:Notify({
+            Title = "¡Árbol Encontrado!",
+            Content = "Tipo: " .. tostring(tipoHallado) .. " (" .. tostring(partes) .. " partes)\n¿No te sirve? Presiona para cambiar de servidor.",
+            Duration = 15,
+            Image = 4483362458,
+            Actions = {
+                Ignore = {
+                    Name = "Quedarme aquí",
+                    Callback = function()
+                        print("El usuario decidió quedarse en este servidor.")
+                    end
+                },
+                ServerHop = {
+                    Name = "Servidor Siguiente",
+                    Callback = function()
+                        realizarServerHop()
+                    end
+                }
+            }
+        })
     else
         realizarServerHop()
     end
@@ -194,7 +209,7 @@ end
 -- =======================================================
 
 local Window = Rayfield:CreateWindow({
-    Name = "Blob Hub - Tree Finder v0.0.7",
+    Name = "Blob Hub - Tree Finder v0.0.8",
     LoadingTitle = "Cargando Interfaz...",
     LoadingSubtitle = "Por MblobFuck",
     ConfigurationSaving = { Enabled = false },
@@ -214,7 +229,6 @@ MainTab:CreateDropdown({
     Flag = "TreeType",
     Callback = function(Option)
         local valor = typeof(Option) == "table" and Option[1] or Option
-        -- Previene que la inicialización visual de Rayfield pise el valor guardado de un Server Hop
         if getgenv().AutoStartFinder and getgenv().BlobConfig.TreeType ~= valor then
             return
         end
