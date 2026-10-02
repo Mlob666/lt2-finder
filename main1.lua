@@ -11,7 +11,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- URL de tu script en GitHub con bypass de caché
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v=" .. tick()
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main1.lua?v=" .. tick()
 
 -- 2. Configuración Global Persistente en memoria de Luau
 if not getgenv().BlobConfig then
