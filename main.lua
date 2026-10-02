@@ -3,12 +3,12 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- 2. Crear la ventana principal
 local Window = Rayfield:CreateWindow({
-   Name = "Mi Script Hub",
+   Name = "Finder",
    LoadingTitle = "Cargando Interfaz...",
-   LoadingSubtitle = "Por Dev",
+   LoadingSubtitle = "Por MblobFuck",
    ConfigurationSaving = {
       Enabled = false, -- Cambia a true si quieres guardar la configuración en un archivo local
-      FolderName = "MiScriptHub",
+      FolderName = "FinderHub",
       FileName = "Config"
    },
    Discord = {
