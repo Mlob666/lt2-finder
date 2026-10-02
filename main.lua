@@ -1,4 +1,4 @@
--- v0.0.6
+-- v0.0.7
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -11,7 +11,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- URL de tu script en GitHub con bypass de caché
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main1.lua?v=" .. tick()
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v=" .. tick()
 
 -- 2. Configuración Global Persistente en memoria de Luau
 if not getgenv().BlobConfig then
@@ -33,23 +33,48 @@ local realizarServerHop, buscarArbol, iniciarBusqueda
 
 -- 3. Función para realizar Server Hop con Notificación Personalizada
 realizarServerHop = function()
-    local configActual = getgenv().BlobConfig
+    local config = getgenv().BlobConfig
     getgenv().AutoStartFinder = true
 
     Rayfield:Notify({
         Title = "Server hop",
-        Content = "Tree not found: " .. tostring(configActual.TreeType),
+        Content = "Tree not found: " .. tostring(config.TreeType),
         Duration = 3,
         Image = 4483362458,
     })
 
     if queue_on_teleport then
-        queue_on_teleport(string.format([[
+        -- Construimos el código que redefinirá getgenv().BlobConfig en el nuevo servidor antes de descargar main.lua
+        local codeToQueue = string.format([[
             repeat task.wait() until game:IsLoaded()
-            task.wait(3)
+            task.wait(2)
+            
             getgenv().AutoStartFinder = true
+            getgenv().BlobConfig = {
+                TreeType = "%s",
+                TreeSize = "%s",
+                FindSpookyNeon = %s,
+                WebhookURL = "%s",
+                SendWebhooks = %s,
+                StopHopping = %s,
+                LoadBlobHub = %s,
+                TeleportToTree = %s,
+                IsSearching = false
+            }
+            
             loadstring(game:HttpGet('%s'))()
-        ]], SCRIPT_URL))
+        ]],
+        config.TreeType, 
+        config.TreeSize, 
+        tostring(config.FindSpookyNeon), 
+        config.WebhookURL or "", 
+        tostring(config.SendWebhooks), 
+        tostring(config.StopHopping), 
+        tostring(config.LoadBlobHub), 
+        tostring(config.TeleportToTree), 
+        SCRIPT_URL)
+
+        queue_on_teleport(codeToQueue)
     end
 
     local placeId = game.PlaceId
@@ -169,7 +194,7 @@ end
 -- =======================================================
 
 local Window = Rayfield:CreateWindow({
-    Name = "Blob Hub - Tree Finder",
+    Name = "Blob Hub - Tree Finder v0.0.7",
     LoadingTitle = "Cargando Interfaz...",
     LoadingSubtitle = "Por MblobFuck",
     ConfigurationSaving = { Enabled = false },
@@ -189,6 +214,10 @@ MainTab:CreateDropdown({
     Flag = "TreeType",
     Callback = function(Option)
         local valor = typeof(Option) == "table" and Option[1] or Option
+        -- Previene que la inicialización visual de Rayfield pise el valor guardado de un Server Hop
+        if getgenv().AutoStartFinder and getgenv().BlobConfig.TreeType ~= valor then
+            return
+        end
         getgenv().BlobConfig.TreeType = valor
     end,
 })
@@ -201,6 +230,9 @@ MainTab:CreateDropdown({
     Flag = "TreeSize",
     Callback = function(Option)
         local valor = typeof(Option) == "table" and Option[1] or Option
+        if getgenv().AutoStartFinder and getgenv().BlobConfig.TreeSize ~= valor then
+            return
+        end
         getgenv().BlobConfig.TreeSize = valor
     end,
 })
