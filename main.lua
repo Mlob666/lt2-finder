@@ -1,86 +1,52 @@
--- Cargar la librería Rayfield
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- 1. Cargar Kavo Library desde su repositorio oficial
+local Kavo = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 
--- Crear la ventana principal
-local Window = Rayfield:CreateWindow({
-   Name = "TreeFinder Hub",
-   LoadingTitle = "Cargando Script...",
-   LoadingSubtitle = "Por Dev",
-   ConfigurationSaving = { Enabled = false }
-})
+-- 2. Crear la ventana principal y aplicar un tema (puedes usar "DarkTheme", "Midnight", "BloodTheme", etc.)
+local Window = Kavo.CreateLib("Mi Script de Testeo", "Midnight")
 
--- Crear la pestaña de opciones principales
-local TreeTab = Window:CreateTab("Tree Options", 4483362458)
+-- 3. Crear una Pestaña (Tab)
+local MainTab = Window:NewTab("Principal")
 
--- 1. Selector desplegable (Dropdown) para tipo de árbol
-local TreeDropdown = TreeTab:CreateDropdown({
-   Name = "Tree Type",
-   Options = {"Spooky", "Oak", "Birch", "Palm"},
-   CurrentOption = {"Spooky"},
-   MultipleOptions = false,
-   Callback = function(Option)
-       print("Tipo de árbol seleccionado:", Option[1])
-   end,
-})
+-- 4. Crear una Sección dentro de la pestaña
+local MainSection = MainTab:NewSection("Elementos de Prueba")
 
--- 2. Selector para tamaño de árbol
-local SizeDropdown = TreeTab:CreateDropdown({
-   Name = "Tree Size",
-   Options = {"Small", "Medium", "Large", "Huge"},
-   CurrentOption = {"Small"},
-   MultipleOptions = false,
-   Callback = function(Option)
-       print("Tamaño de árbol seleccionado:", Option[1])
-   end,
-})
+-- --- BOTÓN ---
+MainSection:NewButton("Ejecutar Test", "Imprime un mensaje en la consola de F12", function()
+    print("¡El botón funciona correctamente!")
+end)
 
--- 3. Interruptor (Toggle)
-local SpookyToggle = TreeTab:CreateToggle({
-   Name = "Find SpookyNeon too ?",
-   CurrentValue = false,
-   Callback = function(Value)
-       print("SpookyNeon activado:", Value)
-   end,
-})
+-- --- TOGGLE (SWITCH) ---
+MainSection:NewToggle("Velocidad Aumentada", "Activa o desactiva la velocidad extra", function(state)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        if state then
+            player.Character.Humanoid.WalkSpeed = 50
+            print("Velocidad activada (50)")
+        else
+            player.Character.Humanoid.WalkSpeed = 16
+            print("Velocidad normal (16)")
+        end
+    end
+end)
 
--- Pestaña para Configuración de Servidor
-local ServerTab = Window:CreateTab("Server Options", 4483362458)
+-- --- DROPDOWN (MENÚ DESPLEGABLE) ---
+MainSection:NewDropdown("Selecciona un Objeto", "Elige una opción de la lista", {"Manzana", "Espada", "Poción"}, function(selectedOption)
+    print("Has seleccionado:", selectedOption)
+end)
 
--- 4. Botón de Server Hop (Cambiar de servidor a uno público disponible)
-ServerTab:CreateButton({
-   Name = "Server Hop (Buscar otro servidor)",
-   Callback = function()
-       local HttpService = game:GetService("HttpService")
-       local TeleportService = game:GetService("TeleportService")
-       local PlaceId = game.PlaceId
-       local JobId = game.JobId
+-- --- SLIDER (BARRA DESLIZANTE) ---
+MainSection:NewSlider("Salto", "Ajusta la fuerza del salto", 120, 50, function(value)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.JumpPower = value
+    end
+end)
 
-       Rayfield:Notify({
-           Title = "Server Hop",
-           Content = "Buscando un nuevo servidor...",
-           Duration = 3,
-       })
+-- --- SECCIÓN DE CONFIGURACIÓN ---
+local SettingsTab = Window:NewTab("Ajustes")
+local SettingsSection = SettingsTab:NewSection("Keybind de Interfaz")
 
-       -- Obtener la lista de servidores del juego mediante API pública
-       local serversApi = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-       local success, result = pcall(function()
-           return HttpService:JSONDecode(game:HttpGet(serversApi))
-       end)
-
-       if success and result and result.data then
-           for _, server in ipairs(result.data) do
-               -- Verificar que el servidor no sea el actual y tenga espacio disponible
-               if server.id ~= JobId and server.playing < server.maxPlayers then
-                   TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
-                   break
-               end
-           end
-       else
-           Rayfield:Notify({
-               Title = "Error",
-               Content = "No se pudieron obtener servidores.",
-               Duration = 3,
-           })
-       end
-   end,
-})
+-- Permite ocultar/mostrar la interfaz presionando una tecla (por ejemplo, RightControl)
+SettingsSection:NewKeybind("Ocultar UI", "Presiona la tecla para ocultar/mostrar", Enum.KeyCode.RightControl, function()
+    Kavo:ToggleUI()
+end)
