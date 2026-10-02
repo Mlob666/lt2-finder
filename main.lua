@@ -1,40 +1,86 @@
--- Código que estará alojado en tu servidor / GitHub
-local CoreGui = game:GetService("CoreGui")
+-- Cargar la librería Rayfield
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Crear contenedor
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MiGuiRemota"
+-- Crear la ventana principal
+local Window = Rayfield:CreateWindow({
+   Name = "TreeFinder Hub",
+   LoadingTitle = "Cargando Script...",
+   LoadingSubtitle = "Por Dev",
+   ConfigurationSaving = { Enabled = false }
+})
 
--- Prevenir duplicados si se ejecuta varias veces
-if CoreGui:FindFirstChild("MiGuiRemota") then
-    CoreGui.MiGuiRemota:Destroy()
-end
+-- Crear la pestaña de opciones principales
+local TreeTab = Window:CreateTab("Tree Options", 4483362458)
 
-screenGui.Parent = CoreGui
+-- 1. Selector desplegable (Dropdown) para tipo de árbol
+local TreeDropdown = TreeTab:CreateDropdown({
+   Name = "Tree Type",
+   Options = {"Spooky", "Oak", "Birch", "Palm"},
+   CurrentOption = {"Spooky"},
+   MultipleOptions = false,
+   Callback = function(Option)
+       print("Tipo de árbol seleccionado:", Option[1])
+   end,
+})
 
--- Crear ventana principal
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 150)
-frame.Position = UDim2.new(0.5, -125, 0.5, -75)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.Parent = screenGui
+-- 2. Selector para tamaño de árbol
+local SizeDropdown = TreeTab:CreateDropdown({
+   Name = "Tree Size",
+   Options = {"Small", "Medium", "Large", "Huge"},
+   CurrentOption = {"Small"},
+   MultipleOptions = false,
+   Callback = function(Option)
+       print("Tamaño de árbol seleccionado:", Option[1])
+   end,
+})
 
--- Título
-local titulo = Instance.new("TextLabel")
-titulo.Size = UDim2.new(1, 0, 0, 35)
-titulo.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-titulo.Text = "Mi Hub Remoto"
-titulo.TextColor3 = Color3.fromRGB(255, 255, 255)
-titulo.TextSize = 16
-titulo.Parent = frame
+-- 3. Interruptor (Toggle)
+local SpookyToggle = TreeTab:CreateToggle({
+   Name = "Find SpookyNeon too ?",
+   CurrentValue = false,
+   Callback = function(Value)
+       print("SpookyNeon activado:", Value)
+   end,
+})
 
--- Botón de acción
-local boton = Instance.new("TextButton")
-boton.Size = UDim2.new(0, 100, 0, 30)
-boton.Position = UDim2.new(0.5, -50, 0.6, 0)
-boton.Text = "Hola Mundo"
-boton.Parent = frame
+-- Pestaña para Configuración de Servidor
+local ServerTab = Window:CreateTab("Server Options", 4483362458)
 
-boton.MouseButton1Click:Connect(function()
-    print("¡Botón presionado desde el script remoto!")
-end)
+-- 4. Botón de Server Hop (Cambiar de servidor a uno público disponible)
+ServerTab:CreateButton({
+   Name = "Server Hop (Buscar otro servidor)",
+   Callback = function()
+       local HttpService = game:GetService("HttpService")
+       local TeleportService = game:GetService("TeleportService")
+       local PlaceId = game.PlaceId
+       local JobId = game.JobId
+
+       Rayfield:Notify({
+           Title = "Server Hop",
+           Content = "Buscando un nuevo servidor...",
+           Duration = 3,
+       })
+
+       -- Obtener la lista de servidores del juego mediante API pública
+       local serversApi = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+       local success, result = pcall(function()
+           return HttpService:JSONDecode(game:HttpGet(serversApi))
+       end)
+
+       if success and result and result.data then
+           for _, server in ipairs(result.data) do
+               -- Verificar que el servidor no sea el actual y tenga espacio disponible
+               if server.id ~= JobId and server.playing < server.maxPlayers then
+                   TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+                   break
+               end
+           end
+       else
+           Rayfield:Notify({
+               Title = "Error",
+               Content = "No se pudieron obtener servidores.",
+               Duration = 3,
+           })
+       end
+   end,
+})
