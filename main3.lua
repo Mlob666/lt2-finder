@@ -1,4 +1,4 @@
--- v0.0.2
+-- v0.0.3
 
 -- 1. Cargar Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -11,32 +11,36 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- URL de tu script en GitHub con bypass de caché
-local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main.lua?v=" .. tick()
+local SCRIPT_URL = "https://raw.githubusercontent.com/Mlob666/lt2-finder/refs/heads/main/main3.lua" .. tick()
 
--- 2. Configuración Global
-getgenv().BlobConfig = getgenv().BlobConfig or {
-    TreeType = "CaveCrawler",
-    TreeSize = "Any",
-    FindSpookyNeon = false,
-    WebhookURL = "",
-    SendWebhooks = false,
-    StopHopping = true,
-    LoadBlobHub = false,
-    TeleportToTree = true,
-    IsSearching = false
-}
+-- 2. Configuración Global Persistente
+-- Si no existen valores previos en la memoria (getgenv), recién ahí establece la configuración por defecto.
+if not getgenv().BlobConfig then
+    getgenv().BlobConfig = {
+        TreeType = "CaveCrawler",
+        TreeSize = "Any",
+        FindSpookyNeon = false,
+        WebhookURL = "",
+        SendWebhooks = false,
+        StopHopping = true,
+        LoadBlobHub = false,
+        TeleportToTree = true,
+        IsSearching = false
+    }
+end
 
 local BlobConfig = getgenv().BlobConfig
 
 -- Definición adelantada de funciones
 local realizarServerHop, buscarArbol, iniciarBusqueda
 
--- 3. Función para realizar Server Hop
+-- 3. Función para realizar Server Hop con Notificación Personalizada
 realizarServerHop = function()
+    -- Notificación con el formato solicitado
     Rayfield:Notify({
-        Title = "Server Hop Inmediato",
-        Content = "Cambiando de servidor...",
-        Duration = 2,
+        Title = "Server hop",
+        Content = "Tree not found: " .. tostring(BlobConfig.TreeType),
+        Duration = 3,
         Image = 4483362458,
     })
 
@@ -70,7 +74,7 @@ realizarServerHop = function()
     TeleportService:Teleport(placeId, LocalPlayer)
 end
 
--- 4. Función de búsqueda de árboles (Sin modificación de color)
+-- 4. Función de búsqueda de árboles
 buscarArbol = function()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -116,7 +120,6 @@ buscarArbol = function()
                         end
 
                         if troncoBase and coincideTamano then
-                            -- Teletransporte directo sin alterar las propiedades del bloque
                             if BlobConfig.TeleportToTree then
                                 local destino = troncoBase.Position + Vector3.new(0, 4, 0)
                                 rootPart.CFrame = CFrame.new(destino) * (rootPart.CFrame - rootPart.CFrame.Position)
@@ -139,7 +142,7 @@ iniciarBusqueda = function()
 
     Rayfield:Notify({
         Title = "Buscando Árbol...",
-        Content = "Escaneando mapa del servidor...",
+        Content = "Escaneando mapa (" .. tostring(BlobConfig.TreeType) .. ")...",
         Duration = 3,
         Image = 4483362458,
     })
@@ -175,10 +178,11 @@ local Window = Rayfield:CreateWindow({
 })
 
 local MainTab = Window:CreateTab("TreeFinder", "search")
-local PlayerTab = Window:CreateTab("Jugador", 4483362458)
+PlayerTab = Window:CreateTab("Jugador", 4483362458)
 
 MainTab:CreateSection("Tree Option")
 
+-- El valor por defecto del Dropdown toma directamente la variable persistente BlobConfig.TreeType
 MainTab:CreateDropdown({
     Name = "Tree Type",
     Options = {"Spooky", "SpookyNeon", "CaveCrawler", "BlueSpruce", "LoneCave"},
@@ -190,6 +194,7 @@ MainTab:CreateDropdown({
     end,
 })
 
+-- El valor por defecto toma directamente la variable persistente BlobConfig.TreeSize
 MainTab:CreateDropdown({
     Name = "Tree Size",
     Options = {"Small", "Medium", "Large", "Any"},
