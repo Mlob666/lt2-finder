@@ -11,7 +11,7 @@ local LocalPlayer = Players.LocalPlayer
 -- 2. Configuración Global (se almacena en getgenv para persistir entre Server Hops)
 getgenv().BlobConfig = getgenv().BlobConfig or {
     TreeType = "CaveCrawler",
-    TreeSize = "any",
+    TreeSize = "Any",
     FindSpookyNeon = false,
     WebhookURL = "",
     SendWebhooks = false,
