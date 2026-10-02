@@ -44,7 +44,7 @@ MainTab:CreateSection("Tree Option")
 -- Dropdown: Tipo de árbol
 MainTab:CreateDropdown({
    Name = "Tree Type",
-   Options = {"Spooky", "SpookyNeon", "BlueSpruce", "LoneCave"},
+   Options = {"Spooky", "SpookyNeon", "BlueSpruce", "LoneCave", "CaveCrawler"},
    CurrentOption = {BlobConfig.TreeType},
    MultipleOptions = false,
    Flag = "TreeType",
