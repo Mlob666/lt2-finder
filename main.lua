@@ -38,7 +38,7 @@ realizarServerHop = function()
 
     Rayfield:Notify({
         Title = "Server hop",
-        Content = tostring(config.TreeType) .. "Tree not found: ",
+        Content = tostring(config.TreeType) .. "Tree, not found",
         Duration = 3,
         Image = 4483362458,
     })
